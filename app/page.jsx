@@ -14,6 +14,9 @@ import {
 
 import { BarChart } from "@tremor/react";
 
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 //placeholder for chart only
 const chartdata = [
   {
@@ -81,41 +84,43 @@ const chartdata = [
 export default function MainPage() {
   return (
     <>
-      <div className="my-8 mx-[650px]">
-        <label className="font-bold text-center text-3xl">WEIGHT WISE</label>
+      <div className="my-8 mx-auto text-center">
+        <label className="font-bold text-3xl">WEIGHT WISE</label>
       </div>
+
       {/* User Information Form */}
-      <Card className="border-2 border-black mx-8 my-20">
-        <CardContent className="flex flex-row gap-60 mx-40">
-          <div className="pt-8 flex flex-col">
-            <div className="flex flex-row gap-28">
+      <Card className="border-2 border-black mx-5 sm:mx-2 mt-8">
+        <CardHeader>
+          <CardTitle>User Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="pt-3 flex flex-col lg:flex-row flex-wrap lg:gap-6 gap-4 justify-center">
+            <div className="flex flex-col w-full lg:w-[200px]">
               <label>Sex:</label>
               <input type="text" className="border-2 border-black" />
             </div>
 
-            <div className="mt-3 flex flex-row gap-12">
+            <div className="flex flex-col w-full lg:w-[200px]">
               <label>Age in years:</label>
               <input type="number" className="border-2 border-black" />
             </div>
 
-            <div className="mt-3 flex flex-row gap-11">
+            <div className="flex flex-col w-full lg:w-[200px]">
               <label>Weight in Kg.:</label>
               <input type="number" className="border-2 border-black" />
             </div>
-          </div>
 
-          <div className="pt-8">
-            <div className="flex flex-row gap-14">
+            <div className="flex flex-col w-full lg:w-[200px]">
               <label>Height in cm:</label>
               <input type="number" className="border-2 border-black" />
             </div>
 
-            <div className="mt-3 flex flex-row gap-12">
+            <div className="flex flex-col w-full lg:w-[200px]">
               <label>Target Weight:</label>
               <input type="number" className="border-2 border-black" />
             </div>
 
-            <div className="mt-3 flex flex-row gap-5">
+            <div className="flex flex-col w-full lg:w-[200px]">
               <label>Exercise Intensity:</label>
               <input type="text" className="border-2 border-black" />
             </div>
@@ -124,15 +129,35 @@ export default function MainPage() {
       </Card>
 
       {/* Table and Weight Prediction Section */}
-      <div className="flex flex-row mx-5">
+      <div className="flex flex-col lg:flex-row mx-5 mt-8 gap-6">
         {/* Table Card */}
-        <Card className="border-2 border-black mx-3 w-[900px]">
+        <Card className="border-2 border-black w-full lg:w-2/3">
+          <CardHeader>
+            <CardTitle>Periodic Data</CardTitle>
+          </CardHeader>
           <CardContent>
-            <div className="mt-3">
-              <label>No. of Weeks:</label>
-              <input type="number" className="border-2 border-black ml-2" />
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-row mt-3">
+                <RadioGroup defaultValue="Weekly">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Weekly" id="Weekly" />
+                    <Label htmlFor="Weekly">Weekly</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Monthly" id="Monthly" />
+                    <Label htmlFor="Monthly">Monthly</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              <div className="mt-3">
+                <label>No. of Weeks:</label>
+                <input
+                  type="number"
+                  className="border-2 border-black ml-2 w-[80px] sm:w-auto"
+                />
+              </div>
             </div>
-            <div className="w-auto mt-5">
+            <div className="w-auto mt-5 overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -155,7 +180,10 @@ export default function MainPage() {
         </Card>
 
         {/* Weight Prediction Card */}
-        <Card className="border-2 border-black w-[540px]">
+        <Card className="border-2 border-black w-full lg:w-1/3">
+          <CardHeader>
+            <CardTitle>Data Analysis</CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="mt-3">
               <label>Enter Week # to predict weight:</label>
@@ -171,13 +199,13 @@ export default function MainPage() {
       </div>
 
       {/* Chart Section */}
-      <Card className="mt-10 border-2 border-black mx-8">
+      <Card className="mt-10 border-2 border-black mx-5">
         <CardHeader>
           <CardTitle>Your Weight Trend</CardTitle>
         </CardHeader>
         <CardContent>
           <BarChart
-            className="h-80"
+            className="h-80 w-full"
             data={chartdata}
             index="date"
             categories={["SolarPanels", "Inverters"]}
