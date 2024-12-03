@@ -17,6 +17,18 @@ import { BarChart } from "@tremor/react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import { Button } from "@/components/ui/button";
+
+import {
+  Select,
+  SelectGroup,
+  SelectLabel,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 //placeholder for chart only
 const chartdata = [
   {
@@ -97,7 +109,18 @@ export default function MainPage() {
           <div className="pt-3 flex flex-col lg:flex-row flex-wrap lg:gap-6 gap-4 justify-center">
             <div className="flex flex-col w-full lg:w-[200px]">
               <label>Sex:</label>
-              <input type="text" className="border-2 border-black" />
+              <Select>
+                <SelectTrigger className="border-2 border-black ml-2 w-[80px] sm:w-auto h-[28px] rounded-none">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>select</SelectLabel>
+                    <SelectItem value="male">male</SelectItem>
+                    <SelectItem value="female">female</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex flex-col w-full lg:w-[200px]">
