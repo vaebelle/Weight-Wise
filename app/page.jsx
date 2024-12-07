@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "../components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,11 +15,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "../components/ui/table";
 import { BarChart } from "@tremor/react";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Button } from "@/components/ui/button";
+import { Label } from "../components/ui/label";
+import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import { Button } from "../components/ui/button";
 import {
   Select,
   SelectGroup,
@@ -28,33 +28,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../components/ui/select";
 import { Description } from "@headlessui/react";
 
 // Import the interpolation function
-import { newtonMethod } from "./dividedDifference";
 import { dividedDifference } from "./dividedDifference";
-import { lagrangeInterpolation } from "./lagrange";
 
 // Placeholder for chart only
-const chartdata = [
-  {
-    date: "Jan 23",
-    SolarPanels: 2890,
-    Inverters: 2338,
-  },
-  {
-    date: "Feb 23",
-    SolarPanels: 2756,
-    Inverters: 2103,
-  },
-  {
-    date: "Mar 23",
-    SolarPanels: 3322,
-    Inverters: 2194,
-  },
-  // Add other data as needed...
-];
 
 export default function MainPage() {
   const [sex, setSex] = useState();
@@ -71,7 +51,6 @@ export default function MainPage() {
 
   const handleRadiobutton = (value) => {
     setTimeInterval(value);
-    console.log(value);
   };
 
   useEffect(() => {
@@ -105,15 +84,21 @@ export default function MainPage() {
 
       const predictedValue = dividedDifference(xValues, yValues, calorie_burn);
       setPredictedWeight(predictedValue);
-      console.log(xValues);
-      console.log(yValues);
-      console.log(predictedValue);
     } else {
       setPredictedWeight(null); // Clear the prediction if invalid input
     }
   };
 
-  //console.log(rows);
+  const chartdata =
+    rows.map((row) => ({
+      calorie: row.cal_burn,
+      Weight: row.weight,
+    })) || [];
+
+  if (predictedWeight) {
+    chartdata.push({ calorie: predict, Weight: predictedWeight });
+  }
+
   return (
     <>
       <div className="my-8 mx-auto text-center">
@@ -314,7 +299,7 @@ export default function MainPage() {
         <Card className="border-2 border-black w-full lg:w-1/3">
           <CardHeader>
             <CardTitle>Data Analysis</CardTitle>
-            <CardDescription>(Lagrange Method)</CardDescription>
+            <CardDescription>(Divided Difference Method)</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mt-3">
@@ -354,11 +339,10 @@ export default function MainPage() {
           <BarChart
             className="h-80 w-full"
             data={chartdata}
-            index="date"
-            categories={["SolarPanels", "Inverters"]}
-            valueFormatter={(number) =>
-              `$${Intl.NumberFormat("us").format(number).toString()}`
-            }
+            index="calorie"
+            yAxisLabel="Weight (kg)"
+            xAxisLabel="Burned Calories (kcal)"
+            categories={["Weight"]}
             onValueChange={(v) => console.log(v)}
           />
         </CardContent>
