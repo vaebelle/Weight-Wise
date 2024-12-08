@@ -1,8 +1,13 @@
 "use client";
-import * as React from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import {
   Table,
   TableBody,
@@ -10,15 +15,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-
+} from "../components/ui/table";
 import { BarChart } from "@tremor/react";
-
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
-import { Button } from "@/components/ui/button";
-
+import { Label } from "../components/ui/label";
+import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import { Button } from "../components/ui/button";
 import {
   Select,
   SelectGroup,
@@ -27,73 +28,77 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../components/ui/select";
+import { Description } from "@headlessui/react";
 
-//placeholder for chart only
-const chartdata = [
-  {
-    date: "Jan 23",
-    SolarPanels: 2890,
-    Inverters: 2338,
-  },
-  {
-    date: "Feb 23",
-    SolarPanels: 2756,
-    Inverters: 2103,
-  },
-  {
-    date: "Mar 23",
-    SolarPanels: 3322,
-    Inverters: 2194,
-  },
-  {
-    date: "Apr 23",
-    SolarPanels: 3470,
-    Inverters: 2108,
-  },
-  {
-    date: "May 23",
-    SolarPanels: 3475,
-    Inverters: 1812,
-  },
-  {
-    date: "Jun 23",
-    SolarPanels: 3129,
-    Inverters: 1726,
-  },
-  {
-    date: "Jul 23",
-    SolarPanels: 3490,
-    Inverters: 1982,
-  },
-  {
-    date: "Aug 23",
-    SolarPanels: 2903,
-    Inverters: 2012,
-  },
-  {
-    date: "Sep 23",
-    SolarPanels: 2643,
-    Inverters: 2342,
-  },
-  {
-    date: "Oct 23",
-    SolarPanels: 2837,
-    Inverters: 2473,
-  },
-  {
-    date: "Nov 23",
-    SolarPanels: 2954,
-    Inverters: 3848,
-  },
-  {
-    date: "Dec 23",
-    SolarPanels: 3239,
-    Inverters: 3736,
-  },
-];
+// Import the interpolation function
+import { dividedDifference } from "./dividedDifference";
+
+// Placeholder for chart only
 
 export default function MainPage() {
+  const [sex, setSex] = useState();
+  const [age, setAge] = useState();
+  const [weight, setWeight] = useState();
+  const [height, setHeight] = useState();
+  const [tar_weight, setTarWeight] = useState();
+  const [ex_int, setIntensity] = useState();
+  const [time_int, setTimeInterval] = useState("Weeks");
+  const [predict, setPredict] = useState();
+  const [no_time, setTime] = useState(1);
+  const [rows, setRows] = useState([]);
+  const [predictedWeight, setPredictedWeight] = useState(null); // Store the predicted weight
+
+  const handleRadiobutton = (value) => {
+    setTimeInterval(value);
+  };
+
+  useEffect(() => {
+    if (no_time && parseInt(no_time) > 0) {
+      const newRows = Array.from({ length: parseInt(no_time) }, (_, index) => ({
+        id: index + 1,
+        cal_burn: 0, // Initialize with empty values
+        weight: 0, // Initialize with empty values
+      }));
+      setRows(newRows);
+    } else {
+      setRows([]);
+    }
+  }, [no_time]);
+
+  const handleInputChange = (index, field, value) => {
+    const updatedRows = [...rows];
+    updatedRows[index][field] = value;
+    setRows(updatedRows);
+  };
+
+  const handlePredictChange = (value) => {
+    setPredict(value);
+    const calorie_burn = parseFloat(value);
+
+    // Check if the value is a valid number
+    if (!isNaN(calorie_burn) && calorie_burn > 0 && rows.length > 1) {
+      // Use the Newton Interpolation function to calculate predicted weight
+      const xValues = rows.map((row) => parseFloat(row.cal_burn)); // Calories Burned
+      const yValues = rows.map((row) => parseFloat(row.weight)); // Weight (kg)
+
+      const predictedValue = dividedDifference(xValues, yValues, calorie_burn);
+      setPredictedWeight(predictedValue);
+    } else {
+      setPredictedWeight(null); // Clear the prediction if invalid input
+    }
+  };
+
+  const chartdata =
+    rows.map((row) => ({
+      calorie: row.cal_burn,
+      Weight: row.weight,
+    })) || [];
+
+  if (predictedWeight) {
+    chartdata.push({ calorie: predict, Weight: predictedWeight });
+  }
+
   return (
     <>
       <div className="my-8 mx-auto text-center">
@@ -109,7 +114,13 @@ export default function MainPage() {
           <div className="pt-3 flex flex-col lg:flex-row flex-wrap lg:gap-6 gap-4 justify-center">
             <div className="flex flex-col w-full lg:w-[200px]">
               <label>Sex:</label>
-              <Select>
+              <Select
+                value={sex}
+                onValueChange={(value) => {
+                  console.log(value);
+                  setSex(value);
+                }}
+              >
                 <SelectTrigger className="border-2 border-black ml-2 w-[80px] sm:w-auto h-[28px] rounded-none">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -125,27 +136,77 @@ export default function MainPage() {
 
             <div className="flex flex-col w-full lg:w-[200px]">
               <label>Age in years:</label>
-              <input type="number" className="border-2 border-black" />
+              <input
+                type="number"
+                className="border-2 border-black"
+                value={age}
+                onChange={(e) => {
+                  setAge(e.target.value);
+                  console.log(e.target.value);
+                }}
+              />
             </div>
 
             <div className="flex flex-col w-full lg:w-[200px]">
               <label>Weight in Kg.:</label>
-              <input type="number" className="border-2 border-black" />
+              <input
+                type="number"
+                className="border-2 border-black"
+                value={weight}
+                onChange={(e) => {
+                  setWeight(e.target.value);
+                  console.log(e.target.value);
+                }}
+              />
             </div>
 
             <div className="flex flex-col w-full lg:w-[200px]">
               <label>Height in cm:</label>
-              <input type="number" className="border-2 border-black" />
+              <input
+                type="number"
+                className="border-2 border-black"
+                value={height}
+                onChange={(e) => {
+                  setHeight(e.target.value);
+                  console.log(e.target.value);
+                }}
+              />
             </div>
 
             <div className="flex flex-col w-full lg:w-[200px]">
               <label>Target Weight:</label>
-              <input type="number" className="border-2 border-black" />
+              <input
+                type="number"
+                className="border-2 border-black"
+                value={tar_weight}
+                onChange={(e) => {
+                  setTarWeight(e.target.value);
+                  console.log(e.target.value);
+                }}
+              />
             </div>
 
             <div className="flex flex-col w-full lg:w-[200px]">
               <label>Exercise Intensity:</label>
-              <input type="text" className="border-2 border-black" />
+              <Select
+                value={ex_int}
+                onValueChange={(value) => {
+                  console.log(value);
+                  setIntensity(value);
+                }}
+              >
+                <SelectTrigger className="border-2 border-black ml-2 w-[80px] sm:w-auto h-[28px] rounded-none">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>select</SelectLabel>
+                    <SelectItem value="1.15">Light</SelectItem>
+                    <SelectItem value="1.35">Moderate</SelectItem>
+                    <SelectItem value="1.85">Vigorous</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>
@@ -161,22 +222,28 @@ export default function MainPage() {
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex flex-row mt-3">
-                <RadioGroup defaultValue="Weekly">
+                <RadioGroup
+                  defaultValue="Weeks"
+                  value={time_int}
+                  onValueChange={handleRadiobutton}
+                >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Weekly" id="Weekly" />
-                    <Label htmlFor="Weekly">Weekly</Label>
+                    <RadioGroupItem value="Weeks" id="Weekly" />
+                    <Label htmlFor="Weeks">Weekly</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Monthly" id="Monthly" />
-                    <Label htmlFor="Monthly">Monthly</Label>
+                    <RadioGroupItem value="Months" id="Monthly" />
+                    <Label htmlFor="Months">Monthly</Label>
                   </div>
                 </RadioGroup>
               </div>
               <div className="mt-3">
-                <label>No. of Weeks:</label>
+                <label>No. of {time_int}:</label>
                 <input
                   type="number"
                   className="border-2 border-black ml-2 w-[80px] sm:w-auto"
+                  value={no_time}
+                  onChange={(e) => setTime(e.target.value)}
                 />
               </div>
             </div>
@@ -184,18 +251,44 @@ export default function MainPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-auto">Week No.</TableHead>
-                    <TableHead>Calories Burned</TableHead>
-                    <TableHead>Weight</TableHead>
+                    <TableHead className="w-auto">{time_int} No.</TableHead>
+                    <TableHead>Calories Burned (kcal)</TableHead>
+                    <TableHead>Weight (kg)</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* Example Row */}
-                  <TableRow>
-                    <TableCell className="font-medium">1</TableCell>
-                    <TableCell>500</TableCell>
-                    <TableCell>70</TableCell>
-                  </TableRow>
+                  {/* Dynamic Rows */}
+                  {rows.map((row, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{row.id}</TableCell>
+                      <TableCell>
+                        <input
+                          type="number"
+                          className="border-2 border-black"
+                          value={row.cal_burn}
+                          onChange={(e) => {
+                            handleInputChange(
+                              index,
+                              "cal_burn",
+                              e.target.value
+                            );
+                            console.log(e.target.value);
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <input
+                          type="number"
+                          className="border-2 border-black"
+                          value={row.weight}
+                          onChange={(e) => {
+                            handleInputChange(index, "weight", e.target.value);
+                            console.log(e.target.value);
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </div>
@@ -206,16 +299,32 @@ export default function MainPage() {
         <Card className="border-2 border-black w-full lg:w-1/3">
           <CardHeader>
             <CardTitle>Data Analysis</CardTitle>
+            <CardDescription>(Divided Difference Method)</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mt-3">
-              <label>Enter Week # to predict weight:</label>
-              <input type="number" className="border-2 border-black ml-2" />
+              <label>Enter Burned Calories to predict weight:</label>
+              <input
+                type="number"
+                className="border-2 border-black ml-2 justify-center"
+                value={predict}
+                onChange={(e) => {
+                  setPredict(e.target.value);
+                  console.log(e.target.value);
+                }}
+              />
             </div>
             <div className="flex justify-center py-9">
               <label className="italic text-gray-600">
-                Predicted weight here
+                {predictedWeight
+                  ? `${predictedWeight} kg`
+                  : "Predicted weight here"}
               </label>
+            </div>
+            <div className="flex justify-center ">
+              <Button onClick={(e) => handlePredictChange(predict)}>
+                Calculate
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -230,11 +339,10 @@ export default function MainPage() {
           <BarChart
             className="h-80 w-full"
             data={chartdata}
-            index="date"
-            categories={["SolarPanels", "Inverters"]}
-            valueFormatter={(number) =>
-              `$${Intl.NumberFormat("us").format(number).toString()}`
-            }
+            index="calorie"
+            yAxisLabel="Weight (kg)"
+            xAxisLabel="Burned Calories (kcal)"
+            categories={["Weight"]}
             onValueChange={(v) => console.log(v)}
           />
         </CardContent>
