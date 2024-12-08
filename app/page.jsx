@@ -31,23 +31,28 @@ import {
 } from "../components/ui/select";
 import { Description } from "@headlessui/react";
 
+import { Separator } from "../components/ui/separator";
+
 // Import the interpolation function
 import { dividedDifference } from "./dividedDifference";
-
-// Placeholder for chart only
+import { calculateBMR } from "./bmr";
+import { calculateAMR } from "./amr";
 
 export default function MainPage() {
-  const [sex, setSex] = useState();
-  const [age, setAge] = useState();
-  const [weight, setWeight] = useState();
-  const [height, setHeight] = useState();
-  const [tar_weight, setTarWeight] = useState();
-  const [ex_int, setIntensity] = useState();
+  const [sex, setSex] = useState("");
+  const [age, setAge] = useState(0);
+  const [weight, setWeight] = useState(0);
+  const [height, setHeight] = useState(0);
+  const [tar_weight, setTarWeight] = useState(0);
+  const [ex_int, setIntensity] = useState(0);
   const [time_int, setTimeInterval] = useState("Weeks");
-  const [predict, setPredict] = useState();
+  const [predict, setPredict] = useState(0);
   const [no_time, setTime] = useState(1);
   const [rows, setRows] = useState([]);
   const [predictedWeight, setPredictedWeight] = useState(null); // Store the predicted weight
+  const [isFormComplete, setIsFormComplete] = useState(false);
+  const [bmr, setBMR] = useState(null);
+  const [amr, setAMR] = useState(null);
 
   const handleRadiobutton = (value) => {
     setTimeInterval(value);
@@ -89,6 +94,17 @@ export default function MainPage() {
     }
   };
 
+  useEffect(() => {
+    const isComplete =
+      sex &&
+      age > 0 &&
+      weight > 0 &&
+      height > 0 &&
+      tar_weight > 0 &&
+      ex_int > 0;
+    setIsFormComplete(isComplete);
+  }, [sex, age, weight, height, tar_weight, ex_int]);
+
   const chartdata =
     rows.map((row) => ({
       calorie: row.cal_burn,
@@ -98,6 +114,42 @@ export default function MainPage() {
   if (predictedWeight) {
     chartdata.push({ calorie: predict, Weight: predictedWeight });
   }
+
+  // //FOR BMR CALCULATIONS
+  // const handleBMRCalculation = () => {
+  //   try {
+  //     const input = {
+  //       sex: sex,
+  //       weight: parseFloat(weight),
+  //       height: parseFloat(height),
+  //       age: parseInt(age, 10),
+  //     };
+
+  //     const result = calculateBMR(input);
+  //     setBMR(result);
+  //   } catch (error) {
+  //     console.error("Error calculating BMR:", error);
+  //     setBMR(null);
+  //   }
+  // };
+
+  useEffect(() => {
+    // Calculate BMR only when valid inputs are present
+    if (sex && weight > 0 && height > 0 && age > 0) {
+      const input = {
+        sex,
+        weight: parseFloat(weight),
+        height: parseFloat(height),
+        age: parseInt(age, 10),
+      };
+      const calculatedBMR = calculateBMR(input);
+      setBMR(calculatedBMR);
+
+      // Calculate AMR based on BMR and selected intensity level
+      const calculatedAMR = calculateAMR(calculatedBMR, parseFloat(ex_int));
+      setAMR(calculatedAMR);
+    }
+  }, [sex, weight, height, age, ex_int]); // Recalculate when any of these values change
 
   return (
     <>
@@ -220,78 +272,88 @@ export default function MainPage() {
             <CardTitle>Periodic Data</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex flex-row mt-3">
-                <RadioGroup
-                  defaultValue="Weeks"
-                  value={time_int}
-                  onValueChange={handleRadiobutton}
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Weeks" id="Weekly" />
-                    <Label htmlFor="Weeks">Weekly</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Months" id="Monthly" />
-                    <Label htmlFor="Months">Monthly</Label>
-                  </div>
-                </RadioGroup>
+            {!isFormComplete ? (
+              <div className="text-red-500 text-center">
+                Please complete the User Information form before adding table
+                data.
               </div>
-              <div className="mt-3">
-                <label>No. of {time_int}:</label>
-                <input
-                  type="number"
-                  className="border-2 border-black ml-2 w-[80px] sm:w-auto"
-                  value={no_time}
-                  onChange={(e) => setTime(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="w-auto mt-5 overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-auto">{time_int} No.</TableHead>
-                    <TableHead>Calories Burned (kcal)</TableHead>
-                    <TableHead>Weight (kg)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {/* Dynamic Rows */}
-                  {rows.map((row, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{row.id}</TableCell>
-                      <TableCell>
-                        <input
-                          type="number"
-                          className="border-2 border-black"
-                          value={row.cal_burn}
-                          onChange={(e) => {
-                            handleInputChange(
-                              index,
-                              "cal_burn",
-                              e.target.value
-                            );
-                            console.log(e.target.value);
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <input
-                          type="number"
-                          className="border-2 border-black"
-                          value={row.weight}
-                          onChange={(e) => {
-                            handleInputChange(index, "weight", e.target.value);
-                            console.log(e.target.value);
-                          }}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            ) : (
+              <>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-row mt-3">
+                    <RadioGroup
+                      defaultValue="Weeks"
+                      value={time_int}
+                      onValueChange={handleRadiobutton}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="Weeks" id="Weekly" />
+                        <Label htmlFor="Weeks">Weekly</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="Months" id="Monthly" />
+                        <Label htmlFor="Months">Monthly</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                  <div className="mt-3">
+                    <label>No. of {time_int}:</label>
+                    <input
+                      type="number"
+                      className="border-2 border-black ml-2 w-[80px] sm:w-auto"
+                      value={no_time}
+                      onChange={(e) => setTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="w-auto mt-5 overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Week No.</TableHead>
+                        <TableHead>Calories Burned (kcal)</TableHead>
+                        <TableHead>Weight (kg)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {rows.map((row, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{row.id}</TableCell>
+                          <TableCell>
+                            <input
+                              type="number"
+                              className="border-2 border-black"
+                              value={row.cal_burn}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  index,
+                                  "cal_burn",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <input
+                              type="number"
+                              className="border-2 border-black"
+                              value={row.weight}
+                              onChange={(e) =>
+                                handleInputChange(
+                                  index,
+                                  "weight",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -302,7 +364,25 @@ export default function MainPage() {
             <CardDescription>(Divided Difference Method)</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="mt-3">
+            <Separator className="my-4" />
+            {/* AMR and BMR Display */}
+            <div className="flex justify-between mt-5">
+              {bmr && amr && (
+                <>
+                  <div className="flex-1 text-center">
+                    <label className="font-semibold">Your BMR:</label>
+                    <div>{bmr.toFixed(2)} kcal/day</div>
+                  </div>
+
+                  <div className="flex-1 text-center">
+                    <label className="font-semibold">Your AMR:</label>
+                    <div>{amr.toFixed(2)} kcal/day</div>
+                  </div>
+                </>
+              )}
+            </div>
+            <Separator className="my-4" />
+            <div className="mt-6">
               <label>Enter Burned Calories to predict weight:</label>
               <input
                 type="number"
@@ -317,10 +397,40 @@ export default function MainPage() {
             <div className="flex justify-center py-9">
               <label className="italic text-gray-600">
                 {predictedWeight
-                  ? `${predictedWeight} kg`
+                  ? `${predictedWeight.toFixed(2)} kg`
                   : "Predicted weight here"}
               </label>
             </div>
+
+            {/* Conditional Message */}
+            <div className="mt-4 text-center">
+              {predictedWeight && weight && (
+                <div>
+                  {predictedWeight > tar_weight ? (
+                    <span className="text-red-500 font-bold">
+                      Your predicted weight exceeds your target weight. Consider
+                      increasing your exercise intensity or calorie burn to meet
+                      your target.
+                    </span>
+                  ) : predictedWeight < tar_weight ? (
+                    <span className="text-blue-500 font-bold">
+                      Your predicted weight is below your target weight. Adjust
+                      your activity level to align with your goals.
+                    </span>
+                  ) : predictedWeight == tar_weight ? (
+                    <span className="text-green-500 font-bold">
+                      You reach the target weight! Keep up the good work!
+                    </span>
+                  ) : (
+                    <span className="text-green-500 font-bold">
+                      You are on track to reach your target weight. Keep up the
+                      good work!
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="flex justify-center ">
               <Button onClick={(e) => handlePredictChange(predict)}>
                 Calculate
