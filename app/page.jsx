@@ -1,6 +1,8 @@
 "use client";
 
+import { BarChart } from "@tremor/react";
 import { useEffect, useState } from "react";
+import { Button } from "../components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,6 +10,17 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
+import { Label } from "../components/ui/label";
+import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import {
   Table,
   TableBody,
@@ -16,27 +29,14 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
-import { BarChart } from "@tremor/react";
-import { Label } from "../components/ui/label";
-import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
-import { Button } from "../components/ui/button";
-import {
-  Select,
-  SelectGroup,
-  SelectLabel,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
-import { Description } from "@headlessui/react";
 
 import { Separator } from "../components/ui/separator";
 
 // Import the interpolation function
-import { dividedDifference } from "./dividedDifference";
-import { calculateBMR } from "./bmr";
+import { cx } from "class-variance-authority";
 import { calculateAMR } from "./amr";
+import { calculateBMR } from "./bmr";
+import { dividedDifference } from "./dividedDifference";
 
 export default function MainPage() {
   const [sex, setSex] = useState("");
@@ -53,6 +53,23 @@ export default function MainPage() {
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [bmr, setBMR] = useState(null);
   const [amr, setAMR] = useState(null);
+
+  const customTooltip = ({ active, payload }) => {
+    if (!active || !payload || !payload.length) return null;
+
+    const data = payload[0].payload; // Extract data for the active bar
+
+    return (
+      <div className="flex flex-col w-52 rounded-lg border border-gray-300 bg-white p-2 shadow-lg text-center">
+        <div className="font-semibold text-gray-700">{data.calorie} kcal</div>
+        <hr className="my-1 border-gray-300" />
+        <div className="flex justify-between text-gray-600">
+          <span>Weight:</span>
+          <span>{data.Weight} kg</span>
+        </div>
+      </div>
+    );
+  };
 
   const handleRadiobutton = (value) => {
     setTimeInterval(value);
@@ -116,7 +133,7 @@ export default function MainPage() {
   }
 
   useEffect(() => {
-    // Calculate BMR only when valid inputs are present
+    // Ensure all inputs are valid before calculating
     if (sex && weight > 0 && height > 0 && age > 0) {
       const input = {
         sex,
@@ -124,14 +141,20 @@ export default function MainPage() {
         height: parseFloat(height),
         age: parseInt(age, 10),
       };
+
       const calculatedBMR = calculateBMR(input);
       setBMR(calculatedBMR);
 
-      // Calculate AMR based on BMR and selected intensity level
-      const calculatedAMR = calculateAMR(calculatedBMR, parseFloat(ex_int));
-      setAMR(calculatedAMR);
+      // Calculate AMR only if exercise intensity is valid
+      if (ex_int > 0) {
+        const calculatedAMR = calculateAMR(calculatedBMR, parseFloat(ex_int));
+        setAMR(calculatedAMR);
+      }
+    } else {
+      setBMR(null); // Reset BMR if inputs are invalid
+      setAMR(null); // Reset AMR if inputs are invalid
     }
-  }, [sex, weight, height, age, ex_int]); // Recalculate when any of these values change
+  }, [sex, weight, height, age, ex_int]);
 
   return (
     <>
@@ -141,6 +164,18 @@ export default function MainPage() {
             WEIGHT WISE
           </label>
         </div>
+        <div className="mx-5 sm:mx-10 mt-4 text-center">
+          <p>
+            Weight Wise is a health and fitness tool designed to help users
+            manage their weight effectively. It calculates your Basal Metabolic
+            Rate (BMR) and Active Metabolic Rate (AMR) based on your personal
+            details, including sex, age, weight, height, target weight, and
+            exercise intensity. Using metric units, it provides insightful data
+            analysis and offers interpolation and extrapolation functionality to
+            project trends based on your input.
+          </p>
+        </div>
+
         {/* User Information Form */}
         <Card className="border-2 border-[#2E7D32] mx-5 mt-8 bg-[#E8F5E9] shadow-lg">
           <CardHeader>
@@ -362,7 +397,7 @@ export default function MainPage() {
             <CardContent>
               <Separator className="my-4" />
               <div className="flex justify-between mt-5">
-                {bmr && amr && (
+                {bmr !== null && amr !== null && (
                   <>
                     <div className="flex-1 text-center text-[#388E3C]">
                       <label className="font-semibold">Your BMR:</label>
@@ -446,12 +481,14 @@ export default function MainPage() {
             </CardHeader>
             <CardContent>
               <BarChart
-                className="h-80 w-full"
+                className={cx("h-80 w-full fill-[#4da851]")}
                 data={chartdata}
                 index="calorie"
                 yAxisLabel="Weight (kg)"
                 xAxisLabel="Burned Calories (kcal)"
                 categories={["Weight"]}
+                customTooltip={customTooltip}
+                showLegend={false}
                 onValueChange={(v) => console.log(v)}
               />
             </CardContent>
