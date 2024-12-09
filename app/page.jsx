@@ -44,7 +44,7 @@ export default function MainPage() {
   const [weight, setWeight] = useState(0);
   const [height, setHeight] = useState(0);
   const [tar_weight, setTarWeight] = useState(0);
-  const [ex_int, setIntensity] = useState(0);
+  const [ex_int, setIntensity] = useState("");
   const [time_int, setTimeInterval] = useState("Weeks");
   const [predict, setPredict] = useState(0);
   const [no_time, setTime] = useState(1);
@@ -115,24 +115,6 @@ export default function MainPage() {
     chartdata.push({ calorie: predict, Weight: predictedWeight });
   }
 
-  // //FOR BMR CALCULATIONS
-  // const handleBMRCalculation = () => {
-  //   try {
-  //     const input = {
-  //       sex: sex,
-  //       weight: parseFloat(weight),
-  //       height: parseFloat(height),
-  //       age: parseInt(age, 10),
-  //     };
-
-  //     const result = calculateBMR(input);
-  //     setBMR(result);
-  //   } catch (error) {
-  //     console.error("Error calculating BMR:", error);
-  //     setBMR(null);
-  //   }
-  // };
-
   useEffect(() => {
     // Calculate BMR only when valid inputs are present
     if (sex && weight > 0 && height > 0 && age > 0) {
@@ -153,310 +135,329 @@ export default function MainPage() {
 
   return (
     <>
-      <div className="my-8 mx-auto text-center">
-        <label className="font-bold text-3xl">WEIGHT WISE</label>
-      </div>
-
-      {/* User Information Form */}
-      <Card className="border-2 border-black mx-5 sm:mx-2 mt-8">
-        <CardHeader>
-          <CardTitle>User Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="pt-3 flex flex-col lg:flex-row flex-wrap lg:gap-6 gap-4 justify-center">
-            <div className="flex flex-col w-full lg:w-[200px]">
-              <label>Sex:</label>
-              <Select
-                value={sex}
-                onValueChange={(value) => {
-                  console.log(value);
-                  setSex(value);
-                }}
-              >
-                <SelectTrigger className="border-2 border-black ml-2 w-[80px] sm:w-auto h-[28px] rounded-none">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>select</SelectLabel>
-                    <SelectItem value="male">male</SelectItem>
-                    <SelectItem value="female">female</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex flex-col w-full lg:w-[200px]">
-              <label>Age in years:</label>
-              <input
-                type="number"
-                className="border-2 border-black"
-                value={age}
-                onChange={(e) => {
-                  setAge(e.target.value);
-                  console.log(e.target.value);
-                }}
-              />
-            </div>
-
-            <div className="flex flex-col w-full lg:w-[200px]">
-              <label>Weight in Kg.:</label>
-              <input
-                type="number"
-                className="border-2 border-black"
-                value={weight}
-                onChange={(e) => {
-                  setWeight(e.target.value);
-                  console.log(e.target.value);
-                }}
-              />
-            </div>
-
-            <div className="flex flex-col w-full lg:w-[200px]">
-              <label>Height in cm:</label>
-              <input
-                type="number"
-                className="border-2 border-black"
-                value={height}
-                onChange={(e) => {
-                  setHeight(e.target.value);
-                  console.log(e.target.value);
-                }}
-              />
-            </div>
-
-            <div className="flex flex-col w-full lg:w-[200px]">
-              <label>Target Weight:</label>
-              <input
-                type="number"
-                className="border-2 border-black"
-                value={tar_weight}
-                onChange={(e) => {
-                  setTarWeight(e.target.value);
-                  console.log(e.target.value);
-                }}
-              />
-            </div>
-
-            <div className="flex flex-col w-full lg:w-[200px]">
-              <label>Exercise Intensity:</label>
-              <Select
-                value={ex_int}
-                onValueChange={(value) => {
-                  console.log(value);
-                  setIntensity(value);
-                }}
-              >
-                <SelectTrigger className="border-2 border-black ml-2 w-[80px] sm:w-auto h-[28px] rounded-none">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>select</SelectLabel>
-                    <SelectItem value="1.15">Light</SelectItem>
-                    <SelectItem value="1.35">Moderate</SelectItem>
-                    <SelectItem value="1.85">Vigorous</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Table and Weight Prediction Section */}
-      <div className="flex flex-col lg:flex-row mx-5 mt-8 gap-6">
-        {/* Table Card */}
-        <Card className="border-2 border-black w-full lg:w-2/3">
+      <div className="bg-[radial-gradient(circle,_rgba(165,214,167,0.7)_10%,_rgba(165,214,167,0.3)_40%,_rgba(165,214,167,0.6)_70%,_rgba(165,214,167,0.9)_100%)]">
+        <div className="py-8 mx-auto text-center">
+          <label className="font-bold text-3xl text-[#2E7D32]">
+            WEIGHT WISE
+          </label>
+        </div>
+        {/* User Information Form */}
+        <Card className="border-2 border-[#2E7D32] mx-5 mt-8 bg-[#E8F5E9] shadow-lg">
           <CardHeader>
-            <CardTitle>Periodic Data</CardTitle>
+            <CardTitle className="text-[#2E7D32]">User Information</CardTitle>
           </CardHeader>
-          <CardContent>
-            {!isFormComplete ? (
-              <div className="text-red-500 text-center">
-                Please complete the User Information form before adding table
-                data.
+          <CardContent className=" flex flex-col justify-between">
+            <div className="pt-3 flex flex-col lg:flex-row flex-wrap lg:gap-6 gap-4 justify-center">
+              <div className="flex flex-col w-full lg:w-[200px]">
+                <label className="text-[#388E3C]">Sex:</label>
+                <Select
+                  value={sex}
+                  onValueChange={(value) => {
+                    console.log(value);
+                    setSex(value);
+                  }}
+                >
+                  <SelectTrigger className="border-2 border-[#388E3C] bg-white rounded-lg">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Options</SelectLabel>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
-            ) : (
-              <>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex flex-row mt-3">
-                    <RadioGroup
-                      defaultValue="Weeks"
-                      value={time_int}
-                      onValueChange={handleRadiobutton}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Weeks" id="Weekly" />
-                        <Label htmlFor="Weeks">Weekly</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Months" id="Monthly" />
-                        <Label htmlFor="Months">Monthly</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                  <div className="mt-3">
-                    <label>No. of {time_int}:</label>
-                    <input
-                      type="number"
-                      className="border-2 border-black ml-2 w-[80px] sm:w-auto"
-                      value={no_time}
-                      onChange={(e) => setTime(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="w-auto mt-5 overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Week No.</TableHead>
-                        <TableHead>Calories Burned (kcal)</TableHead>
-                        <TableHead>Weight (kg)</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {rows.map((row, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{row.id}</TableCell>
-                          <TableCell>
-                            <input
-                              type="number"
-                              className="border-2 border-black"
-                              value={row.cal_burn}
-                              onChange={(e) =>
-                                handleInputChange(
-                                  index,
-                                  "cal_burn",
-                                  e.target.value
-                                )
-                              }
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <input
-                              type="number"
-                              className="border-2 border-black"
-                              value={row.weight}
-                              onChange={(e) =>
-                                handleInputChange(
-                                  index,
-                                  "weight",
-                                  e.target.value
-                                )
-                              }
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </>
-            )}
+
+              <div className="flex flex-col w-full lg:w-[200px]">
+                <label className="text-[#388E3C]">Age in years:</label>
+                <input
+                  type="number"
+                  className="border-2 border-[#388E3C] bg-white rounded-lg p-1"
+                  value={age || ""}
+                  onChange={(e) => {
+                    setAge(e.target.value);
+                    console.log(e.target.value);
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col w-full lg:w-[200px]">
+                <label className="text-[#388E3C]">Weight in Kg.:</label>
+                <input
+                  type="number"
+                  className="border-2 border-[#388E3C] bg-white rounded-lg p-1"
+                  value={weight || ""}
+                  onChange={(e) => {
+                    setWeight(e.target.value);
+                    console.log(e.target.value);
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col w-full lg:w-[200px]">
+                <label className="text-[#388E3C]">Height in cm:</label>
+                <input
+                  type="number"
+                  className="border-2 border-[#388E3C] bg-white rounded-lg p-1"
+                  value={height || ""}
+                  onChange={(e) => {
+                    setHeight(e.target.value);
+                    console.log(e.target.value);
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col w-full lg:w-[200px]">
+                <label className="text-[#388E3C]">Target Weight:</label>
+                <input
+                  type="number"
+                  className="border-2 border-[#388E3C] bg-white rounded-lg p-1"
+                  value={tar_weight || ""}
+                  onChange={(e) => {
+                    setTarWeight(e.target.value);
+                    console.log(e.target.value);
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col w-full lg:w-[200px]">
+                <label className="text-[#388E3C]">Exercise Intensity:</label>
+                <Select
+                  value={ex_int}
+                  onValueChange={(value) => {
+                    console.log(value);
+                    setIntensity(value);
+                  }}
+                >
+                  <SelectTrigger className="border-2 border-[#388E3C] bg-white rounded-lg">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Options</SelectLabel>
+                      <SelectItem value="1.15">Light</SelectItem>
+                      <SelectItem value="1.35">Moderate</SelectItem>
+                      <SelectItem value="1.85">Vigorous</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </CardContent>
         </Card>
-
-        {/* Weight Prediction Card */}
-        <Card className="border-2 border-black w-full lg:w-1/3">
-          <CardHeader>
-            <CardTitle>Data Analysis</CardTitle>
-            <CardDescription>(Divided Difference Method)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Separator className="my-4" />
-            {/* AMR and BMR Display */}
-            <div className="flex justify-between mt-5">
-              {bmr && amr && (
+        {/* Table and Weight Prediction Section */}
+        <div className="flex flex-col lg:flex-row mx-5 mt-8 gap-6">
+          {/* Table Card */}
+          <Card className="border-2 border-[#2E7D32] w-full lg:w-2/3 bg-[#E8F5E9] shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-[#2E7D32]">Periodic Data</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!isFormComplete ? (
+                <div className="text-red-500 text-center lg:pt-28">
+                  Please complete the User Information Form.
+                </div>
+              ) : (
                 <>
-                  <div className="flex-1 text-center">
-                    <label className="font-semibold">Your BMR:</label>
-                    <div>{bmr.toFixed(2)} kcal/day</div>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex flex-row mt-3">
+                      <RadioGroup
+                        defaultValue="Weeks"
+                        value={time_int}
+                        onValueChange={handleRadiobutton}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="Week" id="Weekly" />
+                          <Label htmlFor="Weeks" className="text-[#388E3C]">
+                            Weekly
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="Month" id="Monthly" />
+                          <Label htmlFor="Months" className="text-[#388E3C]">
+                            Monthly
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                    <div className="mt-3">
+                      <label className="text-[#388E3C]">
+                        No. of {time_int}s:
+                      </label>
+                      <input
+                        type="number"
+                        className="border-2 border-[#388E3C] bg-white rounded-lg ml-2 p-1"
+                        value={no_time || ""}
+                        onChange={(e) => setTime(e.target.value)}
+                      />
+                    </div>
                   </div>
-
-                  <div className="flex-1 text-center">
-                    <label className="font-semibold">Your AMR:</label>
-                    <div>{amr.toFixed(2)} kcal/day</div>
+                  <div className="w-auto mt-5 overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-[#388E3C]">
+                            {time_int} no.
+                          </TableHead>
+                          <TableHead className="text-[#388E3C]">
+                            Calories Burned (kcal)
+                          </TableHead>
+                          <TableHead className="text-[#388E3C]">
+                            Weight (kg)
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {rows.map((row, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{row.id}</TableCell>
+                            <TableCell>
+                              <input
+                                type="number"
+                                className="border-2 border-[#388E3C] bg-white rounded-lg"
+                                value={row.cal_burn || ""}
+                                onChange={(e) =>
+                                  handleInputChange(
+                                    index,
+                                    "cal_burn",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <input
+                                type="number"
+                                className="border-2 border-[#388E3C] bg-white rounded-lg"
+                                value={row.weight || ""}
+                                onChange={(e) =>
+                                  handleInputChange(
+                                    index,
+                                    "weight",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 </>
               )}
-            </div>
-            <Separator className="my-4" />
-            <div className="mt-6">
-              <label>Enter Burned Calories to predict weight:</label>
-              <input
-                type="number"
-                className="border-2 border-black ml-2 justify-center"
-                value={predict}
-                onChange={(e) => {
-                  setPredict(e.target.value);
-                  console.log(e.target.value);
-                }}
+            </CardContent>
+          </Card>
+
+          {/* Weight Prediction Card */}
+          <Card className="border-2 border-[#2E7D32] w-full lg:w-1/3 bg-[#E8F5E9] shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-[#2E7D32]">Data Analysis</CardTitle>
+              <CardDescription className="text-[#388E3C]">
+                (Divided Difference Method)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Separator className="my-4" />
+              <div className="flex justify-between mt-5">
+                {bmr && amr && (
+                  <>
+                    <div className="flex-1 text-center text-[#388E3C]">
+                      <label className="font-semibold">Your BMR:</label>
+                      <div>{bmr.toFixed(2)} kcal/day</div>
+                    </div>
+
+                    <div className="flex-1 text-center text-[#388E3C]">
+                      <label className="font-semibold">Your AMR:</label>
+                      <div>{amr.toFixed(2)} kcal/day</div>
+                    </div>
+                  </>
+                )}
+              </div>
+              <Separator className="my-4" />
+              <div className="mt-6">
+                <label className="text-[#388E3C]">
+                  Enter Burned Calories to predict weight:
+                </label>
+                <input
+                  type="number"
+                  className="border-2 border-[#388E3C] bg-white rounded-lg ml-2 p-1"
+                  value={predict || ""}
+                  onChange={(e) => {
+                    setPredict(e.target.value);
+                    console.log(e.target.value);
+                  }}
+                />
+              </div>
+              <div className="flex justify-center py-9">
+                <label className="italic text-[#2E7D32]">
+                  {predictedWeight
+                    ? `${predictedWeight.toFixed(2)} kg`
+                    : "Predicted weight here"}
+                </label>
+              </div>
+
+              <div className="mt-4 text-center">
+                {predictedWeight && weight && (
+                  <div>
+                    {predictedWeight > tar_weight ? (
+                      <span className="text-red-500 font-bold">
+                        Your predicted weight exceeds your target weight.
+                        Consider increasing your exercise intensity or calorie
+                        burn to meet your target.
+                      </span>
+                    ) : predictedWeight < tar_weight ? (
+                      <span className="text-blue-500 font-bold">
+                        Your predicted weight is below your target weight.
+                        Adjust your activity level to align with your goals.
+                      </span>
+                    ) : predictedWeight === tar_weight ? (
+                      <span className="text-green-500 font-bold">
+                        You reached the target weight! Keep up the good work!
+                      </span>
+                    ) : (
+                      <span className="text-green-500 font-bold">
+                        You are on track to reach your target weight. Keep up
+                        the good work!
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-center mt-11">
+                <Button onClick={(e) => handlePredictChange(predict)}>
+                  Calculate
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Chart Section */}
+        <div className="pb-12">
+          <Card className="mt-10 border-2 border-[#2E7D32] mx-5 bg-[#E8F5E9] shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-[#2E7D32]">
+                Your Weight Trend
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BarChart
+                className="h-80 w-full"
+                data={chartdata}
+                index="calorie"
+                yAxisLabel="Weight (kg)"
+                xAxisLabel="Burned Calories (kcal)"
+                categories={["Weight"]}
+                onValueChange={(v) => console.log(v)}
               />
-            </div>
-            <div className="flex justify-center py-9">
-              <label className="italic text-gray-600">
-                {predictedWeight
-                  ? `${predictedWeight.toFixed(2)} kg`
-                  : "Predicted weight here"}
-              </label>
-            </div>
-
-            {/* Conditional Message */}
-            <div className="mt-4 text-center">
-              {predictedWeight && weight && (
-                <div>
-                  {predictedWeight > tar_weight ? (
-                    <span className="text-red-500 font-bold">
-                      Your predicted weight exceeds your target weight. Consider
-                      increasing your exercise intensity or calorie burn to meet
-                      your target.
-                    </span>
-                  ) : predictedWeight < tar_weight ? (
-                    <span className="text-blue-500 font-bold">
-                      Your predicted weight is below your target weight. Adjust
-                      your activity level to align with your goals.
-                    </span>
-                  ) : predictedWeight == tar_weight ? (
-                    <span className="text-green-500 font-bold">
-                      You reach the target weight! Keep up the good work!
-                    </span>
-                  ) : (
-                    <span className="text-green-500 font-bold">
-                      You are on track to reach your target weight. Keep up the
-                      good work!
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-center ">
-              <Button onClick={(e) => handlePredictChange(predict)}>
-                Calculate
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      {/* Chart Section */}
-      <Card className="mt-10 border-2 border-black mx-5">
-        <CardHeader>
-          <CardTitle>Your Weight Trend</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <BarChart
-            className="h-80 w-full"
-            data={chartdata}
-            index="calorie"
-            yAxisLabel="Weight (kg)"
-            xAxisLabel="Burned Calories (kcal)"
-            categories={["Weight"]}
-            onValueChange={(v) => console.log(v)}
-          />
-        </CardContent>
-      </Card>
     </>
   );
 }
