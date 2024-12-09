@@ -1,3 +1,24 @@
+/**
+ * Newton's Divided Difference Interpolation Utilities
+ *
+ * These functions are used to construct a divided difference table and perform interpolation
+ * or extrapolation of data points using Newton's Divided Difference method.
+ *
+ * Functions:
+ * - `calculateDividedDifferenceTable`: Constructs a divided difference table for given x and y values.
+ * - `dividedDifference`: Computes the interpolated or extrapolated y value for a given x value.
+**/
+
+/**
+ * Constructs a Divided Difference Table.
+ *
+ * The divided difference table is a triangular table used for Newton's Divided Difference 
+ * interpolation method. It computes the coefficients of the interpolation polynomial.
+ *
+ * @param x - Array of independent variable values (x-values).
+ * @param y - Array of dependent variable values (y-values), corresponding to x-values.
+ * @returns A 2D array (table) containing divided difference coefficients.
+ **/
 export function calculateDividedDifferenceTable(x: number[], y: number[]): number[][] {
   const n = x.length;
   const table: number[][] = Array.from({ length: n }, () => Array(n).fill(0));

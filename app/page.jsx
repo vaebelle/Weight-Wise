@@ -1,7 +1,28 @@
-"use client";
+/**
+ * MainPage
+ *
+ * This component handles the core functionality of the Weight Wise application, which helps users
+ * track their weight management progress based on input data such as age, sex, height, weight, target
+ * weight, exercise intensity, calories burned, and weight loss/gain per week/month. The component calculates BMR (Basal Metabolic Rate)
+ * and AMR (Active Metabolic Rate) and displays weight predictions using the divided difference method for
+ * interpolation and extrapolation.
+ *
+ * The component includes several features:
+ * - User information form with fields for age, sex, weight, height, target weight, and exercise intensity
+ * - Periodic data input form to record calories burned and weight over specific intervals
+ * - Weight prediction functionality based on input data using Newton's Divided Difference method
+ * - BMR and AMR status based on initial inputs
+ * - Data analysis and visual display of weight trend using a bar chart (prediction at the last part of the graph)
+ **/
 
-import { BarChart } from "@tremor/react";
+"use client";
+// React hooks for managing state and side effects
 import { useEffect, useState } from "react";
+
+// Import for rendering bar chart visualization
+import { BarChart } from "@tremor/react";
+
+//UI components
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -29,31 +50,43 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
-
 import { Separator } from "../components/ui/separator";
 
-// Import the interpolation function
 import { cx } from "class-variance-authority";
+
+//Import function for calculating AMR
 import { calculateAMR } from "./amr";
+
+//Import function for calculating BMR
 import { calculateBMR } from "./bmr";
+
+//Import function for Interpolation and Extrapolation calculations using Divided Difference Method
 import { dividedDifference } from "./dividedDifference";
 
+/**
+ * MainPage Component that holds the entire weight management tool logic
+ */
 export default function MainPage() {
-  const [sex, setSex] = useState("");
-  const [age, setAge] = useState(0);
-  const [weight, setWeight] = useState(0);
-  const [height, setHeight] = useState(0);
-  const [tar_weight, setTarWeight] = useState(0);
-  const [ex_int, setIntensity] = useState("");
-  const [time_int, setTimeInterval] = useState("Weeks");
-  const [predict, setPredict] = useState(0);
-  const [no_time, setTime] = useState(1);
-  const [rows, setRows] = useState([]);
-  const [predictedWeight, setPredictedWeight] = useState(null); // Store the predicted weight
-  const [isFormComplete, setIsFormComplete] = useState(false);
-  const [bmr, setBMR] = useState(null);
-  const [amr, setAMR] = useState(null);
+  // States to manage form input data
+  const [sex, setSex] = useState(""); // User's sex (male or female)
+  const [age, setAge] = useState(0); // User's age in years
+  const [weight, setWeight] = useState(0); // User's weight in kg
+  const [height, setHeight] = useState(0); // User's height in cm
+  const [tar_weight, setTarWeight] = useState(0); // User's target weight in kg
+  const [ex_int, setIntensity] = useState(""); // Exercise intensity factor
+  const [time_int, setTimeInterval] = useState("Week"); // Time interval (Weekly/Monthly)
+  const [predict, setPredict] = useState(0); // Predicted calories burned
+  const [no_time, setTime] = useState(1); // Number of time intervals for periodic data
+  const [rows, setRows] = useState([]); // Array to hold periodic data
+  const [predictedWeight, setPredictedWeight] = useState(null); // Store predicted weight
+  const [isFormComplete, setIsFormComplete] = useState(false); // Flag to check if the form is complete
+  const [bmr, setBMR] = useState(null); // Store calculated BMR value
+  const [amr, setAMR] = useState(null); // Store calculated AMR value
 
+  /**
+   * Custom tooltip for the bar chart (design and color schemes)
+   * Displays calories burned and weight when hovering over bars in two decimal places.
+   */
   const customTooltip = ({ active, payload }) => {
     if (!active || !payload || !payload.length) return null;
 
@@ -65,16 +98,22 @@ export default function MainPage() {
         <hr className="my-1 border-gray-300" />
         <div className="flex justify-between text-gray-600">
           <span>Weight:</span>
-          <span>{data.Weight} kg</span>
+          <span>{data.Weight.toFixed(2)} kg</span>
         </div>
       </div>
     );
   };
 
+  /**
+   * Handler to update time interval based on selected radio button (Weekly or Monthly)
+   */
   const handleRadiobutton = (value) => {
     setTimeInterval(value);
   };
 
+  /**
+   * UseEffect Hook that updates rows array based on the number of time intervals inputted by the user
+   */
   useEffect(() => {
     if (no_time && parseInt(no_time) > 0) {
       const newRows = Array.from({ length: parseInt(no_time) }, (_, index) => ({
@@ -88,12 +127,19 @@ export default function MainPage() {
     }
   }, [no_time]);
 
+  /**
+   * Handler for input changes in periodic data table (Calories burned and weight)
+   */
   const handleInputChange = (index, field, value) => {
     const updatedRows = [...rows];
     updatedRows[index][field] = value;
     setRows(updatedRows);
   };
 
+  /**
+   * Handler for prediction changes based on calories burned
+   * Uses Newton's Divided Difference Method for interpolation and extrapolation
+   */
   const handlePredictChange = (value) => {
     setPredict(value);
     const calorie_burn = parseFloat(value);
@@ -105,12 +151,15 @@ export default function MainPage() {
       const yValues = rows.map((row) => parseFloat(row.weight)); // Weight (kg)
 
       const predictedValue = dividedDifference(xValues, yValues, calorie_burn);
-      setPredictedWeight(predictedValue);
+      setPredictedWeight(Math.round(predictedValue * 100) / 100);
     } else {
       setPredictedWeight(null); // Clear the prediction if invalid input
     }
   };
 
+  /**
+   * UseEffect Hook that checks if all the form data is completed. If true, Periodic Table Section is enabled, hence otherwise.
+   */
   useEffect(() => {
     const isComplete =
       sex &&
@@ -122,16 +171,21 @@ export default function MainPage() {
     setIsFormComplete(isComplete);
   }, [sex, age, weight, height, tar_weight, ex_int]);
 
+  // Preparing chart data for the bar chart visualization
   const chartdata =
     rows.map((row) => ({
-      calorie: row.cal_burn,
-      Weight: row.weight,
+      calorie: parseFloat(row.cal_burn),
+      Weight: parseFloat(row.weight),
     })) || [];
 
+  // If prediction exists, add to the chart data
   if (predictedWeight) {
     chartdata.push({ calorie: predict, Weight: predictedWeight });
   }
 
+  /**
+   * Function to calculate BMR and AMR whenever form data is updated
+   */
   useEffect(() => {
     // Ensure all inputs are valid before calculating
     if (sex && weight > 0 && height > 0 && age > 0) {
@@ -164,6 +218,8 @@ export default function MainPage() {
             WEIGHT WISE
           </label>
         </div>
+
+        {/* Weight Wise Description */}
         <div className="mx-5 sm:mx-10 mt-4 text-center">
           <p>
             Weight Wise is a health and fitness tool designed to help users
@@ -282,9 +338,9 @@ export default function MainPage() {
             </div>
           </CardContent>
         </Card>
+
         {/* Table and Weight Prediction Section */}
         <div className="flex flex-col lg:flex-row mx-5 mt-8 gap-6">
-          {/* Table Card */}
           <Card className="border-2 border-[#2E7D32] w-full lg:w-2/3 bg-[#E8F5E9] shadow-lg">
             <CardHeader>
               <CardTitle className="text-[#2E7D32]">Periodic Data</CardTitle>
@@ -299,7 +355,7 @@ export default function MainPage() {
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex flex-row mt-3">
                       <RadioGroup
-                        defaultValue="Weeks"
+                        defaultValue="Week"
                         value={time_int}
                         onValueChange={handleRadiobutton}
                       >
@@ -448,7 +504,8 @@ export default function MainPage() {
                         Your predicted weight is below your target weight.
                         Adjust your activity level to align with your goals.
                       </span>
-                    ) : predictedWeight === tar_weight ? (
+                    ) : parseFloat(predictedWeight) ===
+                      parseFloat(tar_weight) ? (
                       <span className="text-green-500 font-bold">
                         You reached the target weight! Keep up the good work!
                       </span>
